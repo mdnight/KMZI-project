@@ -37,7 +37,9 @@ SOURCES += main.cpp\
     bigint/BigIntegerAlgorithms.cc \
     bigint/BigIntegerUtils.cc \
     bigint/BigUnsigned.cc \
-    bigint/BigUnsignedInABase.cc
+    bigint/BigUnsignedInABase.cc \
+    cardanokeydialog.cpp \
+    cardano.cpp
 
 HEADERS  += mainwindow.h \
     simplereplacement.h \
@@ -54,9 +56,12 @@ HEADERS  += mainwindow.h \
     bigint/BigIntegerUtils.hh \
     bigint/BigUnsigned.hh \
     bigint/BigUnsignedInABase.hh \
-    bigint/NumberlikeArray.hh
+    bigint/NumberlikeArray.hh \
+    cardanokeydialog.h \
+    cardano.h
 
 FORMS    += mainwindow.ui \
     keyvaluedialog.ui \
-    rsakeydialog.ui
-CONFIG += c++11
+    rsakeydialog.ui \
+    cardanokeydialog.ui
+CONFIG += c++14

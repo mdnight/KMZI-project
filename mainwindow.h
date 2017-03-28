@@ -5,6 +5,7 @@
 #include <QPlainTextEdit>
 #include "keyvaluedialog.h"
 #include "rsakeydialog.h"
+#include "cardanokeydialog.h"
 #include <QCheckBox>
 #include <QRegExpValidator>
 
@@ -32,6 +33,7 @@ private:
     KeyValueDialog *kvd;
     RSAKeyDialog *rsakeyDialog;
     QList<QRegExpValidator*> *validatorList;
+    CardanoKeyDialog *cardKeyDialog;
 };
 
 #endif // MAINWINDOW_H

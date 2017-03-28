@@ -10,6 +10,7 @@
 #include "singleshift.h"
 #include "doubletransposition.h"
 #include "gronspheld.h"
+#include "cardano.h"
 #include "rsacrypt.h"
 #include <QCheckBox>
 #include <gammacypher.h>
@@ -31,12 +32,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->genKey->setVisible(false);
     ui->key2Line->setVisible(false);
     ui->rsaKeyButton->setVisible(false);
+    ui->cardanButton->setVisible(false);
     validatorList = new QList<QRegExpValidator*>();
     validatorList->append(new QRegExpValidator(QRegExp(QString("[А-ЕЖ-ИК-Я\\s]+")))); //gamma
     validatorList->append(new QRegExpValidator(QRegExp(QString("[A-ZА-ЕЖ-ИК-Я]+")))); //transpos
     validatorList->append(new QRegExpValidator(QRegExp(QString("[\\d]+")))); //grons
     kvd = new KeyValueDialog();
     rsakeyDialog = new RSAKeyDialog(this);
+    cardKeyDialog = new CardanoKeyDialog(this);
     QObject::connect(ui->genKey, &QAbstractButton::clicked, [=] () {
         ui->keyLine->setEnabled(true);
     });
@@ -70,6 +73,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->plainHex, &QCheckBox::stateChanged, [=] () {this->convertText(ui->plainHex, ui->plainText);});
     QObject::connect(ui->cryptHex, &QCheckBox::stateChanged, [=] () {this->convertText(ui->cryptHex, ui->cypherText);});
     QObject::connect(ui->rsaKeyButton, &QPushButton::clicked, rsakeyDialog, &RSAKeyDialog::show);
+    QObject::connect(ui->cardanButton, &QPushButton::clicked, cardKeyDialog, &CardanoKeyDialog::show);
 }
 
 MainWindow::~MainWindow()
@@ -212,6 +216,19 @@ void MainWindow::performOperation()
             }
             break;
         }
+        case 6: {
+            Cardano cardano(ui->alphBox->currentIndex(), this);
+            ui->plainText->setPlainText(ui->plainText->toPlainText().remove(QRegExp(QString::fromUtf8("[^A-ZА-Я\\s]"))));
+            if (ui->fromFile->isChecked()) {
+
+            }
+            else if (ui->handmadeKey->isChecked()) {
+                cardano.setKey(cardKeyDialog->getMatrix());
+                ui->cypherText->clear();
+                ui->cypherText->setPlainText(cardano.encrypt(ui->plainText->toPlainText()));
+            }
+            break;
+        }
         case 7: {
             Gronspheld grons(ui->alphBox->currentIndex(), this);
             if (ui->genKey->isChecked()) {
@@ -330,7 +347,20 @@ void MainWindow::performOperation()
             }
             break;
         }
+        case 6: {
+            Cardano cardano(ui->alphBox->currentIndex(), this);
+            ui->plainText->setPlainText(ui->plainText->toPlainText().remove(QRegExp(QString::fromUtf8("[^A-ZА-Я\\s]"))));
+            if (ui->fromFile->isChecked()) {
 
+            }
+            else if (ui->handmadeKey->isChecked()) {
+                qDebug() << cardKeyDialog->getMatrix();
+                cardano.setKey(cardKeyDialog->getMatrix());
+                ui->plainText->clear();
+                ui->plainText->setPlainText(cardano.decrypt(ui->cypherText->toPlainText()));
+            }
+            break;
+        }
         case 7:{
             Gronspheld grons(ui->alphBox->currentIndex(), this);
             if (ui->genKey->isChecked()) {
@@ -360,6 +390,7 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->key2Line->setVisible(false);
         ui->alphBox->setVisible(false);
         ui->rsaKeyButton->setVisible(false);
+        ui->cardanButton->setVisible(false);
         break;
     case 1:
         ui->genKey->setVisible(false);
@@ -369,6 +400,7 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->key2Line->setVisible(false);
         ui->alphBox->setVisible(false);
         ui->rsaKeyButton->setVisible(false);
+        ui->cardanButton->setVisible(false);
         break;
     case 2:
         ui->genKey->setVisible(true);
@@ -379,6 +411,7 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->alphBox->setVisible(false);
         ui->keyLine->setValidator(validatorList->at(0));
         ui->rsaKeyButton->setVisible(false);
+        ui->cardanButton->setVisible(false);
         break;
     case 3:
         ui->genKey->setEnabled(true);
@@ -389,6 +422,7 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->alphBox->setVisible(false);
         ui->keyLine->setValidator(validatorList->at(1));
         ui->rsaKeyButton->setVisible(false);
+        ui->cardanButton->setVisible(false);
         break;
     case 4:
         ui->genKey->setVisible(true);
@@ -397,15 +431,22 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->fromFile->setVisible(false);
         ui->alphBox->setVisible(false);
         ui->rsaKeyButton->setVisible(false);
+        ui->cardanButton->setVisible(false);
         break;
     case 5:
         ui->rsaKeyButton->setVisible(true);
         ui->keyLine->setVisible(false);
         ui->key2Line->setVisible(false);
         ui->keyPair->setVisible(false);
+        ui->cardanButton->setVisible(false);
         break;
     case 6:
+        ui->keyLine->setVisible(false);
+        ui->alphBox->setVisible(true);
+        ui->genKey->setVisible(false);
         ui->rsaKeyButton->setVisible(false);
+        ui->cardanButton->setVisible(true);
+        ui->keyPair->setVisible(false);
         break;
     case 7:
         ui->alphBox->setVisible(true);
@@ -416,6 +457,7 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->keyLine->setVisible(true);
         ui->genKey->setVisible(true);
         ui->rsaKeyButton->setVisible(false);
+        ui->cardanButton->setVisible(false);
         break;
     }
 }
