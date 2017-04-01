@@ -9,16 +9,19 @@
 #include "simplereplacement.h"
 #include "singleshift.h"
 #include "doubletransposition.h"
+#include "factorization.h"
 #include "gronspheld.h"
 #include "cardano.h"
 #include "rsacrypt.h"
-#include <QCheckBox>
+#include "bruteforce.h"
+#include "symbolfreqanalysis.h"
+#include "bigrammfreqanalysis.h"
 #include <gammacypher.h>
+#include <QCheckBox>
 #include <QRadioButton>
 #include <QLineEdit>
 #include <QDebug>
 #include <QComboBox>
-#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -33,6 +36,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->key2Line->setVisible(false);
     ui->rsaKeyButton->setVisible(false);
     ui->cardanButton->setVisible(false);
+    ui->bruteTable->verticalHeader()->hide();
+    ui->bruteTable->horizontalHeader()->setStretchLastSection(true);
+    ui->cFreqTable->verticalHeader()->hide();
+    ui->cFreqTable->horizontalHeader()->setStretchLastSection(true);
     validatorList = new QList<QRegExpValidator*>();
     validatorList->append(new QRegExpValidator(QRegExp(QString("[А-ЕЖ-ИК-Я\\s]+")))); //gamma
     validatorList->append(new QRegExpValidator(QRegExp(QString("[A-ZА-ЕЖ-ИК-Я]+")))); //transpos
@@ -74,6 +81,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->cryptHex, &QCheckBox::stateChanged, [=] () {this->convertText(ui->cryptHex, ui->cypherText);});
     QObject::connect(ui->rsaKeyButton, &QPushButton::clicked, rsakeyDialog, &RSAKeyDialog::show);
     QObject::connect(ui->cardanButton, &QPushButton::clicked, cardKeyDialog, &CardanoKeyDialog::show);
+    QObject::connect(ui->factorizeButton, &QPushButton::clicked, this, &MainWindow::factorize);
+    QObject::connect(ui->bruteCyphersBox, SIGNAL(currentIndexChanged(int)), this, SLOT(toggleBruteFields(int)));
+    QObject::connect(ui->bruteButton, &QPushButton::clicked, this, &MainWindow::brute);
+    QObject::connect(ui->calcFreqButton, &QPushButton::clicked, this, &MainWindow::calculateFrequence);
+    QObject::connect(ui->bigramCalcButton, &QPushButton::clicked, this, &MainWindow::calculateBigramm);
 }
 
 MainWindow::~MainWindow()
@@ -477,6 +489,114 @@ void MainWindow::convertText(QCheckBox *cbox, QPlainTextEdit *pte)
         pte->clear();
         pte->setPlainText(QString(QByteArray::fromHex(array)));
         ui->doButton->setEnabled(true);
+    }
+}
+
+void MainWindow::factorize()
+{
+    if (ui->factorizeNumberLine->text().isEmpty()) {
+        QMessageBox::warning(this, QString("Ошибка"), QString("Не введено число"));
+        return;
+    }
+    QString tmp;
+    for (auto i : Factorization::factorize(ui->factorizeNumberLine->text().toStdString()))
+        tmp += QString::fromStdString(bigIntegerToString(i)) + QString(" ");
+    ui->factorizeResultText->setPlainText(tmp);
+}
+
+void MainWindow::brute()
+{
+    switch (ui->bruteCyphersBox->currentIndex()) {
+    case 0: {
+        ui->bruteTable->clear();
+        ui->bruteTable->setColumnCount(3);
+        QList<std::tuple<int, int, QString> > data = Bruteforce::bruteRSA(ui->eParamLine->text().toInt(),
+                                                                          ui->nParamLine->text().toInt(),
+                                                                          ui->bruteLangComboBox->currentIndex(),
+                                                                          ui->ctextLine->text());
+        ui->bruteTable->setRowCount(data.size());
+        for (auto i = 0; i < data.size(); i++) {
+            ui->bruteTable->setItem(i, 0, new QTableWidgetItem(QString::number(std::get<0>(data[i]))));
+            ui->bruteTable->setItem(i, 1, new QTableWidgetItem(QString::number(std::get<1>(data[i]))));
+            ui->bruteTable->setItem(i, 2, new QTableWidgetItem(std::get<2>(data[i])));
+        }
+        break;
+    }
+    case 1: {
+        ui->bruteTable->clear();
+        ui->bruteTable->setColumnCount(2);
+        QList<std::tuple<int, QString> > data = Bruteforce::bruteGronsfeld(ui->bruteLangComboBox->currentIndex(), 10000, ui->ctextLine->text());
+        ui->bruteTable->setRowCount(data.size());
+        for (auto i = 0; i < data.size(); i++) {
+            ui->bruteTable->setItem(i, 0, new QTableWidgetItem(QString::number(std::get<0>(data[i]))));
+            ui->bruteTable->setItem(i, 1, new QTableWidgetItem(std::get<1>(data[i])));
+        }
+        break;
+    }
+    case 2: {
+        ui->bruteTable->clear();
+        ui->bruteTable->setColumnCount(2);
+        QList<std::tuple<QString, QString> > data = Bruteforce::bruteSimpleReplacement(ui->ctextLine->text());
+        ui->bruteTable->setRowCount(data.size());
+        for (auto i = 0; i < data.size(); i++) {
+            ui->bruteTable->setItem(i, 0, new QTableWidgetItem(std::get<0>(data[i])));
+            ui->bruteTable->setItem(i, 1, new QTableWidgetItem(std::get<1>(data[i])));
+        }
+        break;
+    }
+    }
+}
+
+void MainWindow::toggleBruteFields(int i)
+{
+    switch (i) {
+    case 0:
+        ui->eParamLine->setVisible(true);
+        ui->nParamLine->setVisible(true);
+        ui->bruteLangComboBox->setVisible(true);
+       break;
+    case 1:
+        ui->eParamLine->setVisible(false);
+        ui->nParamLine->setVisible(false);
+        ui->bruteLangComboBox->setVisible(true);
+        break;
+    case 2:
+        ui->eParamLine->setVisible(false);
+        ui->nParamLine->setVisible(false);
+        ui->bruteLangComboBox->setVisible(false);
+        break;
+    case 3:
+        ui->eParamLine->setVisible(false);
+        ui->nParamLine->setVisible(false);
+        ui->bruteLangComboBox->setVisible(false);
+        break;
+    }
+}
+
+void MainWindow::calculateFrequence()
+{
+    SymbolFreqAnalysis sfreq(ui->langFreqBox->currentIndex(), this);
+    ui->cFreqTable->clear();
+    ui->cFreqTable->setColumnCount(2);
+    QMap<QString, int> data = sfreq.calculate(ui->ctexForFreq->text());
+    ui->cFreqTable->setRowCount(data.keys().size());
+    QList<QString> keys = data.keys();
+    for (auto i = 0; i < keys.size(); i++) {
+        ui->cFreqTable->setItem(i, 0, new QTableWidgetItem(keys[i]));
+        ui->cFreqTable->setItem(i, 1, new QTableWidgetItem(QString::number(data[keys[i]])));
+    }
+}
+
+void MainWindow::calculateBigramm()
+{
+    ui->bigramTableWidget->clear();
+    ui->bigramTableWidget->setColumnCount(2);
+    QMap<QString, int> data = BigrammFreqAnalysis::calculate(ui->bigramLangBox->currentIndex(), ui->bigramTextLine->text());
+    ui->bigramTableWidget->setRowCount(data.size());
+    QList<QString> keys = data.keys();
+    for (auto i = 0; i < keys.size(); i++) {
+        ui->bigramTableWidget->setItem(i, 0, new QTableWidgetItem(keys[i]));
+        ui->bigramTableWidget->setItem(i, 1, new QTableWidgetItem(QString::number(data[keys[i]])));
     }
 }
 

@@ -13,6 +13,7 @@ public:
   QString encrypt(QString ptext);
   QString decrypt(QString ctext);
   QString genNewKey();
+  void setAlpha(int lang);
 
 private:
   QString *key;

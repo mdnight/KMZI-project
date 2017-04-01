@@ -39,7 +39,11 @@ SOURCES += main.cpp\
     bigint/BigUnsigned.cc \
     bigint/BigUnsignedInABase.cc \
     cardanokeydialog.cpp \
-    cardano.cpp
+    cardano.cpp \
+    symbolfreqanalysis.cpp \
+    bigrammfreqanalysis.cpp \
+    factorization.cpp \
+    bruteforce.cpp
 
 HEADERS  += mainwindow.h \
     simplereplacement.h \
@@ -58,7 +62,11 @@ HEADERS  += mainwindow.h \
     bigint/BigUnsignedInABase.hh \
     bigint/NumberlikeArray.hh \
     cardanokeydialog.h \
-    cardano.h
+    cardano.h \
+    symbolfreqanalysis.h \
+    bigrammfreqanalysis.h \
+    factorization.h \
+    bruteforce.h
 
 FORMS    += mainwindow.ui \
     keyvaluedialog.ui \
