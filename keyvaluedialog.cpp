@@ -9,7 +9,7 @@ KeyValueDialog::KeyValueDialog(QWidget *parent) :
     ui->setupUi(this);
     this->setModal(true);
     ui->tableWidget->setColumnCount(2);
-    ui->tableWidget->setRowCount(60);
+    ui->tableWidget->setRowCount(58);
     ui->tableWidget->horizontalHeader()->hide();
     ui->tableWidget->verticalHeader()->hide();
     dict = new QMap<QString, QString>({
