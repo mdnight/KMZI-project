@@ -644,7 +644,7 @@ void MainWindow::generateKey()
 void MainWindow::loadKeyFromFile()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Выберите файл"),
-                                                    "/home",
+                                                    "C:",
                                                     tr("Text (*.txt);; Any files (*)"));
     QFile file(filename);
     QStringList key;
@@ -688,7 +688,7 @@ void MainWindow::loadKeyFromFile()
 
 QString MainWindow::loadKey() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Выберите файл"),
-                                                    "/home",
+                                                    "C:",
                                                     tr("Text (*.txt);; Any files (*)"));
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
