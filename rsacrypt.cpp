@@ -29,7 +29,7 @@ QString RSACrypt::decrypt(QString ctext)
     QString ptext;
     QStringList ctextList = ctext.split(' ', QString::SkipEmptyParts);
     for (auto i : ctextList) {
-        ptext += alpha->at((power(i.toInt(), d) % n).toUnsignedInt());
+        ptext += alpha->at((power(i.toInt(), d) % n).toUnsignedInt() % alpha->size());
     }
     return ptext;
 }

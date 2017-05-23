@@ -11,6 +11,7 @@ public:
     explicit SimpleReplacement(QMap<QString, QString> dictionary, QObject *parent = 0);
     QString encrypt(const QString plainText);
     QString decrypt(const QString &cryptText) const;
+    void setKey(QMap<QString, QString> &dictMap);
     ~SimpleReplacement();
 
 signals:

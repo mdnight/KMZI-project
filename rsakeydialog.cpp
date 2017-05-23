@@ -41,6 +41,20 @@ bool RSAKeyDialog::isKeySet()
     return setKeyFlag;
 }
 
+QList<int> RSAKeyDialog::getPrimesList() const
+{
+    return primes;
+}
+
+void RSAKeyDialog::setPrimes(int pParam, int qParam)
+{
+    ui->pLine->setText(QString::number(pParam));
+    ui->qLine->setText(QString::number(qParam));
+    while (ui->qLine->text() == ui->pLine->text())
+        ui->qLine->setText(QString::number(qParam));
+    this->calculate();
+}
+
 void RSAKeyDialog::calculate()
 {
     if (ui->pLine->text().isEmpty() || ui->qLine->text().isEmpty()) {

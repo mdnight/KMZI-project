@@ -56,6 +56,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="keyFromFileButton">
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QComboBox" name="alphBox">
              <item>
               <property name="text">
@@ -296,6 +303,251 @@
        <attribute name="title">
         <string>Криптоанализ</string>
        </attribute>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <widget class="QToolBox" name="toolBox">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="page">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>853</width>
+             <height>388</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Полный перебор</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QLabel" name="lbl">
+                <property name="text">
+                 <string>Шифротекст</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="bruteCyphersBox">
+                <item>
+                 <property name="text">
+                  <string>RSA</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Маршрутная перестановка</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Сдвиговый шифр</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QLineEdit" name="eParamLine">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="placeholderText">
+                 <string>e</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="nParamLine">
+                <property name="placeholderText">
+                 <string>n</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="bruteLangComboBox">
+                <item>
+                 <property name="text">
+                  <string>Eng</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Rus</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="ctextLine">
+              <property name="placeholderText">
+               <string>Шифротекст</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="bruteButton">
+              <property name="text">
+               <string>Перебор</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="bruteTable"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_3">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>98</width>
+             <height>152</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Посчет частоты встречи символов в шифротексте</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QLineEdit" name="ctexForFreq">
+                <property name="placeholderText">
+                 <string>Шифротекст</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="langFreqBox">
+                <item>
+                 <property name="text">
+                  <string>Eng</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Rus</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QPushButton" name="calcFreqButton">
+              <property name="text">
+               <string>Подсчитать</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="cFreqTable"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_4">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>853</width>
+             <height>326</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Подсчет частоты встречи биграм в тексте</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <item>
+               <widget class="QLineEdit" name="bigramTextLine">
+                <property name="placeholderText">
+                 <string>Текст</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="bigramLangBox">
+                <item>
+                 <property name="text">
+                  <string>Eng</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Rus</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="bigramCalcButton">
+              <property name="text">
+               <string>Подсчитать</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QTableWidget" name="bigramTableWidget"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_6">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>98</width>
+             <height>152</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Разложение числа на простые множители</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>Число:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="factorizeNumberLine"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QPushButton" name="factorizeButton">
+              <property name="text">
+               <string>Вычислить</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPlainTextEdit" name="factorizeResultText"/>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>

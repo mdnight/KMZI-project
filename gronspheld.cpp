@@ -73,3 +73,14 @@ QString Gronspheld::genNewKey()
     key->append(QString::number(dist(mt)));
     return *key;
 }
+
+void Gronspheld::setAlpha(int lang)
+{
+    switch (lang) {
+    case 0:
+        alpha = new QString(" ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        break;
+    case 1:
+        alpha = new QString(" АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ");
+    }
+}

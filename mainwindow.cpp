@@ -9,23 +9,27 @@
 #include "simplereplacement.h"
 #include "singleshift.h"
 #include "doubletransposition.h"
+#include "factorization.h"
 #include "gronspheld.h"
 #include "cardano.h"
 #include "rsacrypt.h"
-#include <QCheckBox>
+#include "bruteforce.h"
+#include "symbolfreqanalysis.h"
+#include "bigrammfreqanalysis.h"
 #include <gammacypher.h>
+#include <QCheckBox>
 #include <QRadioButton>
 #include <QLineEdit>
 #include <QDebug>
 #include <QComboBox>
-#include <QDebug>
+#include <random>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    setWindowTitle("Karavai-project");
+    setWindowTitle("KMZI");
     ui->handmadeKey->setChecked(true);
     ui->keyLine->setVisible(false);
     ui->encrypt->setChecked(true);
@@ -33,6 +37,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->key2Line->setVisible(false);
     ui->rsaKeyButton->setVisible(false);
     ui->cardanButton->setVisible(false);
+    ui->bruteTable->verticalHeader()->hide();
+    ui->bruteTable->horizontalHeader()->setStretchLastSection(true);
+    ui->cFreqTable->verticalHeader()->hide();
+    ui->cFreqTable->horizontalHeader()->setStretchLastSection(true);
     validatorList = new QList<QRegExpValidator*>();
     validatorList->append(new QRegExpValidator(QRegExp(QString("[А-ЕЖ-ИК-Я\\s]+")))); //gamma
     validatorList->append(new QRegExpValidator(QRegExp(QString("[A-ZА-ЕЖ-ИК-Я]+")))); //transpos
@@ -74,6 +82,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->cryptHex, &QCheckBox::stateChanged, [=] () {this->convertText(ui->cryptHex, ui->cypherText);});
     QObject::connect(ui->rsaKeyButton, &QPushButton::clicked, rsakeyDialog, &RSAKeyDialog::show);
     QObject::connect(ui->cardanButton, &QPushButton::clicked, cardKeyDialog, &CardanoKeyDialog::show);
+    QObject::connect(ui->factorizeButton, &QPushButton::clicked, this, &MainWindow::factorize);
+    QObject::connect(ui->bruteCyphersBox, SIGNAL(currentIndexChanged(int)), this, SLOT(toggleBruteFields(int)));
+    QObject::connect(ui->bruteButton, &QPushButton::clicked, this, &MainWindow::brute);
+    QObject::connect(ui->calcFreqButton, &QPushButton::clicked, this, &MainWindow::calculateFrequence);
+    QObject::connect(ui->bigramCalcButton, &QPushButton::clicked, this, &MainWindow::calculateBigramm);
+    QObject::connect(ui->genKey, &QRadioButton::clicked, this, &MainWindow::generateKey);
+    QObject::connect(ui->keyFromFileButton, &QPushButton::clicked, this, &MainWindow::loadKeyFromFile);
 }
 
 MainWindow::~MainWindow()
@@ -387,6 +402,7 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->keyLine->setVisible(false);
         ui->keyPair->setVisible(true);
         ui->fromFile->setVisible(true);
+        ui->keyFromFileButton->setVisible(true);
         ui->key2Line->setVisible(false);
         ui->alphBox->setVisible(false);
         ui->rsaKeyButton->setVisible(false);
@@ -396,7 +412,8 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->genKey->setVisible(false);
         ui->keyLine->setVisible(false);
         ui->keyPair->setVisible(true);
-        ui->fromFile->setVisible(true);
+        ui->fromFile->setVisible(false);
+        ui->keyFromFileButton->setVisible(false);
         ui->key2Line->setVisible(false);
         ui->alphBox->setVisible(false);
         ui->rsaKeyButton->setVisible(false);
@@ -407,6 +424,7 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->keyLine->setVisible(true);
         ui->keyPair->setVisible(false);
         ui->fromFile->setVisible(true);
+        ui->keyFromFileButton->setVisible(true);
         ui->key2Line->setVisible(false);
         ui->alphBox->setVisible(false);
         ui->keyLine->setValidator(validatorList->at(0));
@@ -414,10 +432,11 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->cardanButton->setVisible(false);
         break;
     case 3:
-        ui->genKey->setEnabled(true);
+        ui->genKey->setVisible(false);
         ui->keyPair->setVisible(false);
         ui->keyLine->setVisible(true);
         ui->fromFile->setVisible(false);
+        ui->keyFromFileButton->setVisible(false);
         ui->key2Line->setVisible(false);
         ui->alphBox->setVisible(false);
         ui->keyLine->setValidator(validatorList->at(1));
@@ -425,15 +444,19 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->cardanButton->setVisible(false);
         break;
     case 4:
-        ui->genKey->setVisible(true);
+        ui->genKey->setVisible(false);
         ui->keyLine->setVisible(true);
         ui->key2Line->setVisible(true);
         ui->fromFile->setVisible(false);
+        ui->keyFromFileButton->setVisible(false);
         ui->alphBox->setVisible(false);
         ui->rsaKeyButton->setVisible(false);
         ui->cardanButton->setVisible(false);
         break;
     case 5:
+        ui->genKey->setVisible(true);
+        ui->fromFile->setVisible(true);
+        ui->keyFromFileButton->setVisible(true);
         ui->rsaKeyButton->setVisible(true);
         ui->keyLine->setVisible(false);
         ui->key2Line->setVisible(false);
@@ -441,6 +464,8 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->cardanButton->setVisible(false);
         break;
     case 6:
+        ui->fromFile->setVisible(false);
+        ui->keyFromFileButton->setVisible(false);
         ui->keyLine->setVisible(false);
         ui->alphBox->setVisible(true);
         ui->genKey->setVisible(false);
@@ -452,7 +477,8 @@ void MainWindow::toggleKeyInputWay(int i) {
         ui->alphBox->setVisible(true);
         ui->keyLine->setValidator(validatorList->at(2));
         ui->key2Line->setVisible(false);
-        ui->fromFile->setVisible(false);
+        ui->fromFile->setVisible(true);
+        ui->keyFromFileButton->setVisible(true);
         ui->keyPair->setVisible(false);
         ui->keyLine->setVisible(true);
         ui->genKey->setVisible(true);
@@ -477,6 +503,186 @@ void MainWindow::convertText(QCheckBox *cbox, QPlainTextEdit *pte)
         pte->clear();
         pte->setPlainText(QString(QByteArray::fromHex(array)));
         ui->doButton->setEnabled(true);
+    }
+}
+
+void MainWindow::factorize()
+{
+    if (ui->factorizeNumberLine->text().isEmpty()) {
+        QMessageBox::warning(this, QString("Ошибка"), QString("Не введено число"));
+        return;
+    }
+    QString tmp;
+    for (auto i : Factorization::factorize(ui->factorizeNumberLine->text().toStdString()))
+        tmp += QString::fromStdString(bigIntegerToString(i)) + QString(" ");
+    ui->factorizeResultText->setPlainText(tmp);
+}
+
+void MainWindow::brute()
+{
+    switch (ui->bruteCyphersBox->currentIndex()) {
+    case 0: {
+        ui->bruteTable->clear();
+        ui->bruteTable->setColumnCount(3);
+        QList<std::tuple<int, int, QString> > data = Bruteforce::bruteRSA(ui->eParamLine->text().toInt(),
+                                                                          ui->nParamLine->text().toInt(),
+                                                                          ui->bruteLangComboBox->currentIndex(),
+                                                                          ui->ctextLine->text());
+        ui->bruteTable->setRowCount(data.size());
+        for (auto i = 0; i < data.size(); i++) {
+            ui->bruteTable->setItem(i, 0, new QTableWidgetItem(QString::number(std::get<0>(data[i]))));
+            ui->bruteTable->setItem(i, 1, new QTableWidgetItem(QString::number(std::get<1>(data[i]))));
+            ui->bruteTable->setItem(i, 2, new QTableWidgetItem(std::get<2>(data[i])));
+        }
+        break;
+    }
+    case 1: {
+        ui->bruteTable->clear();
+        ui->bruteTable->setColumnCount(2);
+        QList<std::tuple<int, QString> > data = Bruteforce::bruteGronsfeld(ui->bruteLangComboBox->currentIndex(), 10000, ui->ctextLine->text());
+        ui->bruteTable->setRowCount(data.size());
+        for (auto i = 0; i < data.size(); i++) {
+            ui->bruteTable->setItem(i, 0, new QTableWidgetItem(QString::number(std::get<0>(data[i]))));
+            ui->bruteTable->setItem(i, 1, new QTableWidgetItem(std::get<1>(data[i])));
+        }
+        break;
+    }
+    case 2: {
+        ui->bruteTable->clear();
+        ui->bruteTable->setColumnCount(2);
+        QList<std::tuple<QString, QString> > data = Bruteforce::bruteSimpleReplacement(ui->ctextLine->text());
+        ui->bruteTable->setRowCount(data.size());
+        for (auto i = 0; i < data.size(); i++) {
+            ui->bruteTable->setItem(i, 0, new QTableWidgetItem(std::get<0>(data[i])));
+            ui->bruteTable->setItem(i, 1, new QTableWidgetItem(std::get<1>(data[i])));
+        }
+        break;
+    }
+    }
+}
+
+void MainWindow::toggleBruteFields(int i)
+{
+    switch (i) {
+    case 0:
+        ui->eParamLine->setVisible(true);
+        ui->nParamLine->setVisible(true);
+        ui->bruteLangComboBox->setVisible(true);
+       break;
+    case 1:
+        ui->eParamLine->setVisible(false);
+        ui->nParamLine->setVisible(false);
+        ui->bruteLangComboBox->setVisible(true);
+        break;
+    case 2:
+        ui->eParamLine->setVisible(false);
+        ui->nParamLine->setVisible(false);
+        ui->bruteLangComboBox->setVisible(false);
+        break;
+    case 3:
+        ui->eParamLine->setVisible(false);
+        ui->nParamLine->setVisible(false);
+        ui->bruteLangComboBox->setVisible(false);
+        break;
+    }
+}
+
+void MainWindow::calculateFrequence()
+{
+    SymbolFreqAnalysis sfreq(ui->langFreqBox->currentIndex(), this);
+    ui->cFreqTable->clear();
+    ui->cFreqTable->setColumnCount(2);
+    QMap<QString, int> data = sfreq.calculate(ui->ctexForFreq->text());
+    ui->cFreqTable->setRowCount(data.keys().size());
+    QList<QString> keys = data.keys();
+    for (auto i = 0; i < keys.size(); i++) {
+        ui->cFreqTable->setItem(i, 0, new QTableWidgetItem(keys[i]));
+        ui->cFreqTable->setItem(i, 1, new QTableWidgetItem(QString::number(data[keys[i]])));
+    }
+}
+
+void MainWindow::calculateBigramm()
+{
+    ui->bigramTableWidget->clear();
+    ui->bigramTableWidget->setColumnCount(2);
+    QMap<QString, int> data = BigrammFreqAnalysis::calculate(ui->bigramLangBox->currentIndex(), ui->bigramTextLine->text());
+    ui->bigramTableWidget->setRowCount(data.size());
+    QList<QString> keys = data.keys();
+    for (auto i = 0; i < keys.size(); i++) {
+        ui->bigramTableWidget->setItem(i, 0, new QTableWidgetItem(keys[i]));
+        ui->bigramTableWidget->setItem(i, 1, new QTableWidgetItem(QString::number(data[keys[i]])));
+    }
+}
+
+void MainWindow::generateKey()
+{
+    std::random_device rd;
+    std::mt19937 mt(rd());
+
+    if(ui->cyphersBox->currentIndex() == 2) {
+        QString alpha(" АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ");
+        QString tmp("");
+        std::uniform_int_distribution<int> dist(0, alpha.size()-1);
+
+        for (int i=0; i<32; ++i)
+            tmp.append(alpha.at(dist(mt)));
+        ui->keyLine->clear();
+        ui->keyLine->setText(tmp);
+    }
+    else if (ui->cyphersBox->currentIndex() == 5) {
+        std::uniform_int_distribution<int> dist(0, rsakeyDialog->getPrimesList().size()-1);
+        rsakeyDialog->setPrimes(rsakeyDialog->getPrimesList().at(dist(mt)),
+                                rsakeyDialog->getPrimesList().at(dist(mt)));
+    }
+    else if (ui->cyphersBox->currentIndex() == 7) {
+        std::uniform_int_distribution<int> dist(1, 10000);
+        ui->keyLine->clear();
+        ui->keyLine->setText(QString::number(dist(mt)));
+    }
+}
+
+void MainWindow::loadKeyFromFile()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Выберите файл"),
+                                                    "/home",
+                                                    tr("Text (*.txt);; Any files (*)"));
+    QFile file(filename);
+    QStringList key;
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, tr("Ошибка"), tr("Не удается открыть файл"), QMessageBox::Ok);
+        return;
+    }
+    else {
+        QTextStream in(&file);
+        while (!in.atEnd())
+            key.append(in.readLine());
+        file.close();
+    }
+    if (ui->cyphersBox->currentIndex() == 1) {
+        QMap<QString, QString> map;
+        foreach (auto i, key) {
+            auto tmp = i.split(" ");
+            map[tmp[0]] = tmp[1];
+        }
+
+        kvd->setCustomDict(&map);
+    }
+    else if (ui->cyphersBox->currentIndex() == 2) {
+        key[0].toUpper();
+        key[0].remove(QRegExp(QString::fromUtf8("[^А-Я\\s]")));
+        key[0].truncate(32);
+        ui->keyLine->setText(key[0]);
+    }
+    else if (ui->cyphersBox->currentIndex() == 5) {
+        key[0].remove(QRegExp(QString::fromUtf8("[^\\d\\s]")));
+        auto primes = key[0].split(" ");
+        rsakeyDialog->setPrimes(primes[0].toInt(), primes[1].toInt());
+
+    }
+    else if (ui->cyphersBox->currentIndex() == 7) {
+        key[0].remove(QRegExp(QString::fromUtf8("[^\\d]")));
+        key[0].truncate(4);
+        ui->keyLine->setText(key[0]);
     }
 }
 

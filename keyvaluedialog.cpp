@@ -66,6 +66,13 @@ QMap<QString, QString> KeyValueDialog::readDict() const
     return *dict;
 }
 
+void KeyValueDialog::setCustomDict(QMap<QString, QString> *customDict)
+{
+    dict = customDict;
+    for (auto i = 0; i < customDict->keys().length(); i++)
+        ui->tableWidget->item(i, 0)->setText(customDict->keys()[i]);
+}
+
 void KeyValueDialog::moveUp() {
     QTableWidgetItem *tmpItem = new QTableWidgetItem(ui->tableWidget->item(0,1)->text());
     delete ui->tableWidget->item(0,1);

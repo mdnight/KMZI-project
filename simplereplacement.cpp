@@ -24,6 +24,11 @@ QString SimpleReplacement::decrypt(const QString &cryptText) const
     return plainText;
 }
 
+void SimpleReplacement::setKey(QMap<QString, QString> &dictMap)
+{
+    dict = &dictMap;
+}
+
 SimpleReplacement::~SimpleReplacement()
 {
 }

@@ -15,6 +15,7 @@ public:
     explicit KeyValueDialog(QWidget *parent = 0);
     ~KeyValueDialog();
     QMap<QString, QString> readDict() const;
+    void setCustomDict(QMap<QString, QString> *customDict);
 
 private:
     Ui::KeyValueDialog *ui;
