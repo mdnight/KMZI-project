@@ -33,6 +33,8 @@ private slots:
     void toggleBruteFields(int i);
     void calculateFrequence();
     void calculateBigramm();
+    void generateKey();
+    void loadKeyFromFile();
 private:
     Ui::MainWindow *ui;
     KeyValueDialog *kvd;

@@ -72,4 +72,4 @@ FORMS    += mainwindow.ui \
     keyvaluedialog.ui \
     rsakeydialog.ui \
     cardanokeydialog.ui
-CONFIG += c++14
+CONFIG += c++17

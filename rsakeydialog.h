@@ -17,6 +17,8 @@ public:
     void getPubKeyParams(int &ee, int &nn);
     void getPrivKeyParams(int &dd, int &nn);
     bool isKeySet();
+    QList<int> getPrimesList() const;
+    void setPrimes(int pParam, int qParam);
 
 private:
     Ui::RSAKeyDialog *ui;
