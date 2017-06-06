@@ -642,21 +642,39 @@
             QString tmp("");
             std::uniform_int_distribution<int> dist(0, alpha.size()-1);
 
-            for (int i=0; i<32; ++i)
-                tmp.append(alpha.at(dist(mt)));
-            ui->keyLine->clear();
-            ui->keyLine->setText(tmp);
-        }
-        else if (ui->cyphersBox->currentIndex() == 5) {
-            std::uniform_int_distribution<int> dist(0, rsakeyDialog->getPrimesList().size()-1);
-            rsakeyDialog->setPrimes(rsakeyDialog->getPrimesList().at(dist(mt)),
-                                    rsakeyDialog->getPrimesList().at(dist(mt)));
-        }
-        else if (ui->cyphersBox->currentIndex() == 7) {
-            std::uniform_int_distribution<int> dist(1, 10000);
-            ui->keyLine->clear();
-            ui->keyLine->setText(QString::number(dist(mt)));
-        }
+        for (int i=0; i<32; ++i)
+            tmp.append(alpha.at(dist(mt)));
+        ui->keyLine->clear();
+        ui->keyLine->setText(tmp);
+    }
+    else if (ui->cyphersBox->currentIndex() == 5) {
+        std::uniform_int_distribution<int> dist(0, rsakeyDialog->getPrimesList().size()-1);
+        rsakeyDialog->setPrimes(rsakeyDialog->getPrimesList().at(dist(mt)),
+                                rsakeyDialog->getPrimesList().at(dist(mt)));
+    }
+    else if (ui->cyphersBox->currentIndex() == 7) {
+        std::uniform_int_distribution<int> dist(1, 10000);
+        ui->keyLine->clear();
+        ui->keyLine->setText(QString::number(dist(mt)));
+    }
+}
+
+void MainWindow::loadKeyFromFile()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Выберите файл"),
+                                                    "C:",
+                                                    tr("Text (*.txt);; Any files (*)"));
+    QFile file(filename);
+    QStringList key;
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, tr("Ошибка"), tr("Не удается открыть файл"), QMessageBox::Ok);
+        return;
+    }
+    else {
+        QTextStream in(&file);
+        while (!in.atEnd())
+            key.append(in.readLine());
+        file.close();
     }
 
     void MainWindow::loadKeyFromFile()
@@ -703,27 +721,32 @@
             ui->keyLine->setText(key[0]);
         }
     }
+    else if (ui->cyphersBox->currentIndex() == 7) {
+        key[0].remove(QRegExp(QString::fromUtf8("[^\\d]")));
+        key[0].truncate(4);
+        ui->keyLine->setText(key[0]);
+    }
+}
 
-    QString MainWindow::loadKey() {
-        QString fileName = QFileDialog::getOpenFileName(this, tr("Выберите файл"),
-                                                        "/home",
-                                                        tr("Text (*.txt);; Any files (*)"));
-        QFile file(fileName);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QMessageBox::warning(this, tr("Ошибка"), tr("Не удается открыть файл"), QMessageBox::Ok);
-            return QString("");
-        }
-        else {
-            QString text;
-            QTextStream in(&file);
-            while (!in.atEnd())
-                text.append(in.readLine());
-            file.close();
+QString MainWindow::loadKey() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Выберите файл"),
+                                                    "C:",
+                                                    tr("Text (*.txt);; Any files (*)"));
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, tr("Ошибка"), tr("Не удается открыть файл"), QMessageBox::Ok);
+        return QString("");
+    }
+    else {
+        QString text;
+        QTextStream in(&file);
+        while (!in.atEnd())
+            text.append(in.readLine());
+        file.close();
 
-            if (text.length() > 5000)
-                text.truncate(5000);
-            text = text.toUpper();
-            text.remove(QRegExp(QString::fromUtf8("[^A-ZА-Я\\s]")));
-            return text;
-        }
+        if (text.length() > 5000)
+            text.truncate(5000);
+        text = text.toUpper();
+        text.remove(QRegExp(QString::fromUtf8("[^A-ZА-Я\\s]")));
+        return text;
     }
