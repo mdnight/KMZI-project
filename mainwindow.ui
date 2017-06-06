@@ -314,8 +314,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>853</width>
-             <height>388</height>
+             <width>286</width>
+             <height>216</height>
             </rect>
            </property>
            <attribute name="label">
@@ -411,8 +411,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>853</width>
-             <height>388</height>
+             <width>98</width>
+             <height>152</height>
             </rect>
            </property>
            <attribute name="label">
@@ -477,6 +477,9 @@
                  <string>Текст</string>
                 </property>
                </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="bigrammSize"/>
               </item>
              </layout>
             </item>

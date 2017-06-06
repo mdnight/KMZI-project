@@ -5,7 +5,7 @@ BigrammFreqAnalysis::BigrammFreqAnalysis(QObject *parent) : QObject(parent)
 {
 }
 
-QMap<QString, int> BigrammFreqAnalysis::calculate(const QString &ctext)
+QMap<QString, int> BigrammFreqAnalysis::calculate(const QString &ctext, int size)
 {
     QVector<QVector<int> > bigrammTable = {
         {2, 7, 8, 6, 7, 7, 7, 7, 4, 7, 7, 7, 8, 8, 3, 7, 6, 7, 8, 2, 6, 6, 7, 7, 5, 5, 0, 0, 0, 0, 6, 7, 9},
@@ -50,9 +50,9 @@ QMap<QString, int> BigrammFreqAnalysis::calculate(const QString &ctext)
     auto splittedString = ctext.split(";");
 
     QString tmp("");
-    for (auto k = 0; k < 5; k++)
-        for (auto i = k; i < 5; i++)
-            for (auto j = 0; j < 4; j++) {
+    for (auto k = 0; k < size; k++)
+        for (auto i = k; i < size; i++)
+            for (auto j = 0; j < size - 1; j++) {
                 tmp = QString(splittedString[j][k]) + QString(splittedString[j][i]);
                 freq[tmp] = bigrammTable.at(alpha.indexOf(tmp[1])).at(alpha.indexOf(tmp[0]));
             }
